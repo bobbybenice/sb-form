@@ -14,7 +14,7 @@ export function middleware(req: NextRequest) {
 
   const currentTime = Math.floor(Date.now() / 1000);
 
-  console.log(`Request from IP: ${ip} at ${currentTime}`);
+  console.log(`This request is from IP: ${ip} at ${currentTime}`);
 
   if (ip && rateLimits[ip]) {
     const { count, timestamp } = rateLimits[ip];
