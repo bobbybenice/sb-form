@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
+// Requiring valid origin/referer manually, but could be done through Vercel Web Application Firewall.
+// Rate limiting logic was tested but omitted. Vercel WAF rate-limiting requires PRO plan.
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const TO_EMAIL = process.env.RESEND_TO_EMAIL;
