@@ -1,7 +1,9 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  middleware: {
+    '/api/*': './app/api/middleware.ts',
+  },
 };
 
 export default nextConfig;

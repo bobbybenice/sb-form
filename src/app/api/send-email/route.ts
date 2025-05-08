@@ -6,10 +6,19 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const TO_EMAIL = process.env.RESEND_TO_EMAIL;
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL;
 
+const ALLOWED_ORIGIN = 'https://sb-form-bobbybenices-projects.vercel.app/';
+
 export async function POST(req: Request) {
+  const origin = req.headers.get('origin') || req.headers.get('referer');
+
+  if (!origin || !origin.startsWith(ALLOWED_ORIGIN)) {
+    return NextResponse.json({ error: 'Unauthorized origin' }, { status: 403 });
+  }
+
   if (!process.env.RESEND_API_KEY || !TO_EMAIL || !FROM_EMAIL) {
     throw new Error('Missing required Resend environment variables.');
   }
+
   try {
     const { firstName, lastName, email, message } = await req.json();
 
