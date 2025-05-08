@@ -1,7 +1,8 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InputField } from './ui/input-field';
+import { TextArea } from './ui/text-area';
 
 export default function HomePage() {
   const [form, setForm] = useState({
@@ -18,7 +19,15 @@ export default function HomePage() {
     message: '',
   });
 
-  const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<'success' | 'error' | ''>('');
+
+  useEffect(() => {
+    if (status !== '') {
+      const timer = setTimeout(() => setStatus(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -64,7 +73,7 @@ export default function HomePage() {
     const hasErrors = Object.values(errors).some(Boolean);
     if (hasErrors) return;
 
-    setStatus('Sending...');
+    setLoading(true);
     const res = await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -72,102 +81,142 @@ export default function HomePage() {
     });
 
     if (res.ok) {
-      setStatus('Email sent!');
+      setStatus('success');
       setForm({ firstName: '', lastName: '', email: '', message: '' });
       setFormErrors({ firstName: '', lastName: '', email: '', message: '' });
     } else {
-      setStatus('Failed to send.');
+      setStatus('error');
     }
+    setLoading(false);
   };
-
-  const renderError = (field: keyof typeof formErrors) => (
-    <AnimatePresence mode='wait'>
-      {formErrors[field] && (
-        <motion.p
-          key={field}
-          className='text-red-600 text-xs mt-1 absolute bottom-0 left-3'
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 16 }}
-          exit={{ opacity: 0, y: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          {formErrors[field]}
-        </motion.p>
-      )}
-    </AnimatePresence>
-  );
 
   const isFormValid =
     Object.values(form).every((v) => v.trim() !== '') &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
 
   return (
-    <div className='flex justify-center items-center h-screen'>
-      <form
-        key='sb-form'
-        onSubmit={handleSubmit}
-        className='flex flex-col gap-5 max-w-[500px] mx-auto p-10 bg-[#F1ECF6] rounded-[10px]'
-        noValidate
-      >
-        <div className='flex'>
-          <InputField
-            name='firstName'
-            label='First name *'
-            value={form.firstName}
-            error={formErrors.firstName}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-          <InputField
-            name='lastName'
-            label='Last name *'
-            value={form.lastName}
-            error={formErrors.lastName}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
-        <InputField
-          name='email'
-          label='Email *'
-          value={form.email}
-          error={formErrors.email}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
-        <div className='relative w-full'>
-          <label htmlFor='message' className='text-black text-sm'>
-            Message *
-          </label>
-          <textarea
-            name='message'
-            id='message'
-            placeholder='Enter your message'
-            value={form.message}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            className='relative z-1 block w-full h-32 border border-[#EDEFF2] rounded-lg bg-white px-3 pt-5 pb-2 text-sm focus:border-[#73467B] focus:outline-none text-black'
-          />
-          {renderError('message')}
-        </div>
-        <p className='text-[#74777E] text-sm'>
-          For information about our privacy practices and commitment to
-          protecting your privacy, please review our{' '}
-          <a href='#' className='text-[#73467B] underline'>
-            Privacy Policy
-          </a>
-          .
-        </p>
-        <motion.button
-          type='submit'
-          className='bg-[#73467B] rounded-lg text-white px-4 py-2 self-start cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed'
-          whileTap={{ scale: 0.95 }}
-          disabled={!isFormValid}
-        >
-          Send Message
-        </motion.button>
-        {status && <p className='text-sm mt-2'>{status}</p>}
-      </form>
-    </div>
+    <AnimatePresence mode='popLayout'>
+      <motion.div className='flex justify-center items-center h-screen' layout>
+        {status === '' ? (
+          <motion.form
+            key='form'
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            layoutId='sb-form'
+            onSubmit={handleSubmit}
+            className='flex flex-col gap-5 max-w-[500px] mx-auto p-10 bg-[#F1ECF6] rounded-[10px]'
+            noValidate
+          >
+            <motion.div
+              className='flex'
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <InputField
+                name='firstName'
+                label='First name *'
+                value={form.firstName}
+                error={formErrors.firstName}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+              <InputField
+                name='lastName'
+                label='Last name *'
+                value={form.lastName}
+                error={formErrors.lastName}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <InputField
+                name='email'
+                label='Email *'
+                value={form.email}
+                error={formErrors.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <TextArea
+                name='message'
+                label='Message *'
+                value={form.message}
+                placeholder='Enter your message'
+                error={formErrors.message}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </motion.div>
+            <motion.p
+              className='text-[#74777E] text-sm'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              For information about our privacy practices and commitment to
+              protecting your privacy, please review our{' '}
+              <a href='#' className='text-[#73467B] underline'>
+                Privacy Policy
+              </a>
+              .
+            </motion.p>
+            <motion.button
+              type='submit'
+              className='bg-[#73467B] rounded-lg text-white px-4 py-2 leading-6.5 min-w-[9.25rem] self-start cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              whileTap={{ scale: 0.95 }}
+              disabled={!isFormValid}
+            >
+              {loading ? 'Sending...' : 'Send Message'}
+            </motion.button>
+          </motion.form>
+        ) : (
+          <motion.div
+            key='success'
+            layoutId='sb-form'
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className='p-10 text-center bg-[#F1ECF6] rounded-[10px] max-w-[500px]'
+          >
+            <motion.h2
+              className='text-2xl font-semibold text-[#73467B] mb-2'
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+            >
+              {status === 'success' ? 'Thank you!' : 'Ouch!'}
+            </motion.h2>
+            <motion.p
+              className='text-gray-700'
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.4 }}
+            >
+              {status === 'success'
+                ? 'Your message has been sent successfully.'
+                : 'Something went wrong.'}
+            </motion.p>
+          </motion.div>
+        )}
+      </motion.div>
+    </AnimatePresence>
   );
 }

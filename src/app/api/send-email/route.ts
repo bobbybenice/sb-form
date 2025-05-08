@@ -9,12 +9,18 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const TO_EMAIL = process.env.RESEND_TO_EMAIL;
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL;
 
-const ALLOWED_ORIGIN = 'https://sb-form-bobbybenices-projects.vercel.app';
+const ALLOWED_ORIGINS = [
+  'https://sb-form-bobbybenices-projects.vercel.app',
+  'http://localhost:3000',
+];
 
 export async function POST(req: Request) {
   const origin = req.headers.get('origin') || req.headers.get('referer');
 
-  if (!origin || !origin.startsWith(ALLOWED_ORIGIN)) {
+  if (
+    !origin ||
+    !ALLOWED_ORIGINS.some((allowed) => origin.startsWith(allowed))
+  ) {
     return NextResponse.json({ error: 'Unauthorized origin' }, { status: 403 });
   }
 
