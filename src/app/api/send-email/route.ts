@@ -6,7 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const TO_EMAIL = process.env.RESEND_TO_EMAIL;
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL;
 
-const ALLOWED_ORIGIN = 'https://sb-form-bobbybenices-projects.vercel.app/';
+const ALLOWED_ORIGIN = 'https://sb-form-bobbybenices-projects.vercel.app';
 
 export async function POST(req: Request) {
   const origin = req.headers.get('origin') || req.headers.get('referer');
