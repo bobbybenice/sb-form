@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-// Requiring valid origin/referer manually, but could be done through Vercel Web Application Firewall.
-// Rate limiting logic was tested but omitted. Vercel WAF rate-limiting requires PRO plan.
-
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const TO_EMAIL = process.env.RESEND_TO_EMAIL;
@@ -17,15 +14,15 @@ const ALLOWED_ORIGINS = [
 export async function POST(req: Request) {
   const origin = req.headers.get('origin') || req.headers.get('referer');
 
-  if (
-    !origin ||
-    !ALLOWED_ORIGINS.some((allowed) => origin.startsWith(allowed))
-  ) {
+  if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
     return NextResponse.json({ error: 'Unauthorized origin' }, { status: 403 });
   }
 
   if (!process.env.RESEND_API_KEY || !TO_EMAIL || !FROM_EMAIL) {
-    throw new Error('Missing required Resend environment variables.');
+    return NextResponse.json(
+      { error: 'Missing required Resend environment variables.' },
+      { status: 500 }
+    );
   }
 
   try {
@@ -64,3 +61,11 @@ export async function POST(req: Request) {
     );
   }
 }
+
+/**
+ * THOUGHTS
+ * Requiring valid origin/referer manually, but could be done through Vercel Web Application Firewall.
+ * Rate limiting logic was tested but omitted. Vercel WAF rate-limiting requires PRO plan.
+ * CORS management
+ * Captcha, or something equivalent, for bot protection
+ */

@@ -1,8 +1,15 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { InputField } from './ui/input-field';
 import { TextArea } from './ui/text-area';
+import { validateField } from './utils/validators';
+
+const motionProps = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.3 },
+};
 
 export default function HomePage() {
   const [form, setForm] = useState({
@@ -19,11 +26,16 @@ export default function HomePage() {
     message: '',
   });
 
+  const firstFieldRef = useRef<HTMLInputElement>(null!);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'success' | 'error' | ''>('');
 
   useEffect(() => {
-    if (status !== '') {
+    firstFieldRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (status) {
       const timer = setTimeout(() => setStatus(''), 3000);
       return () => clearTimeout(timer);
     }
@@ -33,22 +45,8 @@ export default function HomePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm((prev) => ({ ...prev, [name]: value }));
     setFormErrors((prev) => ({ ...prev, [name]: '' }));
-  };
-
-  const validateField = (name: string, value: string) => {
-    let error = '';
-    if (name === 'firstName' && !value.trim())
-      error = 'First name is required.';
-    if (name === 'lastName' && !value.trim()) error = 'Last name is required.';
-    if (name === 'email') {
-      if (!value.trim()) error = 'Email is required.';
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-        error = 'Enter a valid email address.';
-    }
-    if (name === 'message' && !value.trim()) error = 'Message is required.';
-    return error;
   };
 
   const handleBlur = (
@@ -62,32 +60,39 @@ export default function HomePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const errors = {
-      firstName: validateField('firstName', form.firstName),
-      lastName: validateField('lastName', form.lastName),
-      email: validateField('email', form.email),
-      message: validateField('message', form.message),
-    };
+    if (loading) return;
+
+    const errors = Object.entries(form).reduce(
+      (acc, [key, value]) => {
+        acc[key as keyof typeof form] = validateField(key, value);
+        return acc;
+      },
+      {} as typeof formErrors
+    );
 
     setFormErrors(errors);
+
     const hasErrors = Object.values(errors).some(Boolean);
     if (hasErrors) return;
 
     setLoading(true);
-    const res = await fetch('/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
 
-    if (res.ok) {
-      setStatus('success');
-      setForm({ firstName: '', lastName: '', email: '', message: '' });
-      setFormErrors({ firstName: '', lastName: '', email: '', message: '' });
-    } else {
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      setStatus(res.ok ? 'success' : 'error');
+      if (res.ok) {
+        setForm({ firstName: '', lastName: '', email: '', message: '' });
+      }
+    } catch {
       setStatus('error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const isFormValid =
@@ -96,23 +101,22 @@ export default function HomePage() {
 
   return (
     <AnimatePresence mode='popLayout'>
-      <motion.div className='flex justify-center items-center h-screen' layout>
+      <motion.div
+        className='flex justify-center items-center h-screen px-4 lg:px-0'
+        layout
+      >
         {status === '' ? (
           <motion.form
             key='form'
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
             layoutId='sb-form'
             onSubmit={handleSubmit}
-            className='flex flex-col gap-5 max-w-[500px] mx-auto p-10 bg-[#F1ECF6] rounded-[10px]'
+            className='flex flex-col gap-5 max-w-[500px] mx-auto p-6 lg:p-10 bg-[#F1ECF6] rounded-[10px]'
             noValidate
+            {...motionProps}
           >
             <motion.div
               className='flex'
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              {...motionProps}
               transition={{ delay: 0.1 }}
             >
               <InputField
@@ -122,6 +126,7 @@ export default function HomePage() {
                 error={formErrors.firstName}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                inputRef={firstFieldRef}
               />
               <InputField
                 name='lastName'
@@ -132,11 +137,8 @@ export default function HomePage() {
                 onBlur={handleBlur}
               />
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
+
+            <motion.div {...motionProps} transition={{ delay: 0.2 }}>
               <InputField
                 name='email'
                 label='Email *'
@@ -146,11 +148,8 @@ export default function HomePage() {
                 onBlur={handleBlur}
               />
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
+
+            <motion.div {...motionProps} transition={{ delay: 0.3 }}>
               <TextArea
                 name='message'
                 label='Message *'
@@ -161,10 +160,10 @@ export default function HomePage() {
                 onBlur={handleBlur}
               />
             </motion.div>
+
             <motion.p
               className='text-[#74777E] text-sm'
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              {...motionProps}
               transition={{ delay: 0.4 }}
             >
               For information about our privacy practices and commitment to
@@ -174,33 +173,33 @@ export default function HomePage() {
               </a>
               .
             </motion.p>
+
             <motion.button
               type='submit'
               className='bg-[#73467B] rounded-lg text-white px-4 py-2 leading-6.5 min-w-[9.25rem] self-start cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed'
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              disabled={!isFormValid || loading}
               whileTap={{ scale: 0.95 }}
-              disabled={!isFormValid}
+              {...motionProps}
+              transition={{ delay: 0.5 }}
             >
               {loading ? 'Sending...' : 'Send Message'}
             </motion.button>
           </motion.form>
         ) : (
           <motion.div
-            key='success'
+            key='feedback'
             layoutId='sb-form'
+            className='p-10 text-center bg-[#F1ECF6] rounded-[10px] max-w-[500px]'
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className='p-10 text-center bg-[#F1ECF6] rounded-[10px] max-w-[500px]'
           >
             <motion.h2
               className='text-2xl font-semibold text-[#73467B] mb-2'
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
+              transition={{ delay: 0.3 }}
             >
               {status === 'success' ? 'Thank you!' : 'Ouch!'}
             </motion.h2>
@@ -208,7 +207,7 @@ export default function HomePage() {
               className='text-gray-700'
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.4 }}
+              transition={{ delay: 0.4 }}
             >
               {status === 'success'
                 ? 'Your message has been sent successfully.'
