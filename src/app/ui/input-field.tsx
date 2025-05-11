@@ -2,33 +2,39 @@
 import React from 'react';
 
 type InputFieldProps = {
+  type: 'text' | 'email';
   name: string;
   label: string;
   value: string;
+  required?: boolean;
   error?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   className?: string;
-  inputRef?: React.RefObject<HTMLInputElement>;
+  inputRef?: React.Ref<HTMLInputElement>;
+  position?: 'left' | 'right';
 };
 
 export const InputField: React.FC<InputFieldProps> = ({
+  type,
   name,
   label,
   value,
+  required,
   error,
   onChange,
   onBlur,
   className = '',
   inputRef,
+  position,
 }) => {
   const baseStyle =
     'relative z-1 peer w-full border border-[#EDEFF2] rounded-lg bg-white px-4 pb-2.5 pt-5.5 text-sm placeholder-transparent focus:border-[#73467B] focus:outline-none text-black';
 
   const edgeStyle =
-    name === 'firstName'
+    position === 'left'
       ? 'border-r-white rounded-r-none'
-      : name === 'lastName'
+      : position === 'right'
         ? 'border-l-white rounded-l-none'
         : '';
 
@@ -39,7 +45,9 @@ export const InputField: React.FC<InputFieldProps> = ({
       <input
         ref={inputRef}
         id={name}
+        type={type}
         name={name}
+        required={required}
         placeholder=' '
         value={value}
         onChange={onChange}
@@ -65,7 +73,8 @@ export const InputField: React.FC<InputFieldProps> = ({
       <p
         id={`${name}-error`}
         role='alert'
-        aria-live='polite'
+        aria-live='assertive'
+        aria-hidden={!error}
         className={`inline-block absolute bottom-0 left-4 text-red-600 text-xs mt-1 ${
           error ? 'translate-y-4 opacity-100' : 'translate-y-0 opacity-0'
         } transition-all ease-out duration-300`}

@@ -5,6 +5,7 @@ type TextAreaProps = {
   name: string;
   label: string;
   value: string;
+  required?: boolean;
   placeholder: string;
   error?: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -15,6 +16,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
   name,
   label,
   value,
+  required,
   placeholder,
   error,
   onChange,
@@ -30,6 +32,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
         name={name}
         placeholder={placeholder}
         value={value}
+        required={required}
         onChange={onChange}
         onBlur={onBlur}
         aria-invalid={!!error}
@@ -38,6 +41,9 @@ export const TextArea: React.FC<TextAreaProps> = ({
       />
       <p
         id={`${name}-error`}
+        role='alert'
+        aria-live='assertive'
+        aria-hidden={!error}
         className={`inline-block absolute bottom-0 left-3 text-red-600 text-xs mt-1 ${
           error ? 'translate-y-4 opacity-100' : 'translate-y-0 opacity-0'
         } transition-all ease-out duration-300`}

@@ -12,7 +12,7 @@ export const validateField = (name: string, value: string): string => {
     return `${label} is required.`;
   }
 
-  if (name === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+  if (name === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) {
     return 'Enter a valid email address.';
   }
 

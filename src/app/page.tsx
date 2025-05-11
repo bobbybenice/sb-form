@@ -26,7 +26,7 @@ export default function HomePage() {
     message: '',
   });
 
-  const firstFieldRef = useRef<HTMLInputElement>(null!);
+  const firstFieldRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'success' | 'error' | ''>('');
 
@@ -88,7 +88,8 @@ export default function HomePage() {
       if (res.ok) {
         setForm({ firstName: '', lastName: '', email: '', message: '' });
       }
-    } catch {
+    } catch (error) {
+      console.error('Error submitting form:', error);
       setStatus('error');
     } finally {
       setLoading(false);
@@ -97,10 +98,10 @@ export default function HomePage() {
 
   const isFormValid =
     Object.values(form).every((v) => v.trim() !== '') &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+    /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email);
 
   return (
-    <AnimatePresence mode='popLayout'>
+    <AnimatePresence>
       <motion.div
         className='flex justify-center items-center h-screen px-4 lg:px-0'
         layout
@@ -120,29 +121,37 @@ export default function HomePage() {
               transition={{ delay: 0.1 }}
             >
               <InputField
+                type='text'
                 name='firstName'
                 label='First name *'
                 value={form.firstName}
+                required
                 error={formErrors.firstName}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 inputRef={firstFieldRef}
+                position='left'
               />
               <InputField
+                type='text'
                 name='lastName'
                 label='Last name *'
                 value={form.lastName}
+                required
                 error={formErrors.lastName}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                position='right'
               />
             </motion.div>
 
             <motion.div {...motionProps} transition={{ delay: 0.2 }}>
               <InputField
+                type='email'
                 name='email'
                 label='Email *'
                 value={form.email}
+                required
                 error={formErrors.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -194,6 +203,8 @@ export default function HomePage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
+            aria-live='polite'
+            role='status'
           >
             <motion.h2
               className='text-2xl font-semibold text-[#73467B] mb-2'
@@ -204,7 +215,7 @@ export default function HomePage() {
               {status === 'success' ? 'Thank you!' : 'Ouch!'}
             </motion.h2>
             <motion.p
-              className='text-gray-700'
+              className='text-gray-700 text-sm'
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
