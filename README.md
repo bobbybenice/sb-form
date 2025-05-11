@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Form Submission Tool
+
+[https://sb-form-bobbybenices-projects.vercel.app/](https://sb-form-bobbybenices-projects.vercel.app/)
+
+This project is a **React-based form** submission tool with a **Next.js API system** that allows users to submit their contact details through a form. The form includes fields for first name, last name, email, and message, and submissions are sent via email using the Resend API. The tool also features robust form validation, ensuring that users provide all required information in a proper format.
 
 ## Getting Started
 
-First, run the development server:
+To get started with this project locally, follow these steps:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Clone the repository:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+   ```bash
+   git clone https://github.com/bobbybenice/sb-form.git
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. Install the dependencies:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   ```
 
-## Learn More
+3. Run the development server:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the app in action.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
+- **Contact Form**: A form where users can submit their first name, last name, email, and message.
+- **Form Validation**: Ensures all required fields are filled out, with specific validation for the email address format.
+- **Email Notification**: Submissions are sent to a specified email address via the Resend API, allowing for real-time notifications.
+- **Cross-Origin Request Handling**: Validates the origin of the form submission to ensure secure interaction with the server.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Techniques Used
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project utilizes a variety of technologies and techniques to deliver a smooth user experience and efficient development process:
+
+- **Next.js**: A React framework that enables server-side rendering, static site generation, and API routes.
+- **React**: A JavaScript library for building user interfaces, utilized to create dynamic components.
+- **Tailwind CSS**: A utility-first CSS framework that simplifies styling by using pre-defined classes for responsiveness and flexibility.
+- **Framer Motion**: A library for creating animations and transitions in React applications, which adds smooth animations when interacting with elements.
+- **TypeScript**: TypeScript enhances JavaScript with static typing, providing better code quality and reducing potential runtime errors.
+
+- **Next.js API Routes**: Handles form submission logic and email sending on the server-side within the same codebase.
+- **Resend API**: Used for sending email notifications when a form is successfully submitted.
+
+## Contacts
+
+- **Name**: Robert Pettersson
+- **Email**: [pettersson.rob@gmail.com](mailto:pettersson.rob@gmail.com)
+- **LinkedIn**: [https://www.linkedin.com/in/petterssonrob/](https://www.linkedin.com/in/petterssonrob/)
